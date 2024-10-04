@@ -1,5 +1,34 @@
-import Typography from "@mui/material/Typography";
+// App.tsx
+import React from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import MainLayout from "./core/components/MainLayout";
+import AuthPage from "./features/auth/pages/Auth";
+import DashboardPage from "./features/dashboard/pages/Dashboard";
+import MapPage from "./features/map/pages/MapPage";
 
-export default function ButtonUsage() {
-  return <Typography>Hello World</Typography>;
-}
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <MainLayout />, // Usando o layout comum
+    children: [
+      {
+        path: "dashboard", // Rota para Dashboard
+        element: <DashboardPage />,
+      },
+      {
+        path: "map", // Rota para o mapa
+        element: <MapPage />,
+      },
+    ],
+  },
+  {
+    path: "login", // Rota para Login (fora do MainLayout)
+    element: <AuthPage />,
+  },
+]);
+
+const App: React.FC = () => {
+  return <RouterProvider router={router} />;
+};
+
+export default App;
