@@ -1,4 +1,5 @@
 // LoginPage.tsx
+import { zodResolver } from "@hookform/resolvers/zod";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 import PersonIcon from "@mui/icons-material/Person";
@@ -13,13 +14,47 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-const LoginPage = () => {
+const loginSchema = z.object({
+  email: z.string().email({ message: "Digite um email válido" }),
+  password: z
+    .string()
+    .min(6, { message: "A senha deve ter pelo menos 6 caracteres" }),
+});
+
+const signupSchema = loginSchema.extend({
+  name: z
+    .string()
+    .min(3, { message: "O nome deve ter pelo menos 3 caracteres" }),
+});
+
+type LoginFormInputs = z.infer<typeof loginSchema>;
+type SignupFormInputs = z.infer<typeof signupSchema>;
+
+const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false); // Estado para controlar se é cadastro ou login
 
   // Função para alternar entre Login e Sign Up
   const handleSignUpToggle = () => {
     setIsSignUp(!isSignUp);
+  };
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormInputs | SignupFormInputs>({
+    resolver: zodResolver(isSignUp ? signupSchema : loginSchema),
+  });
+
+  const onSubmit = (data: unknown) => {
+    if (isSignUp) {
+      console.log("Cadastro: ", data);
+    } else {
+      console.log("Login: ", data);
+    }
   };
 
   return (
@@ -30,9 +65,12 @@ const LoginPage = () => {
         xs={12}
         md={6}
         sx={{
-          backgroundImage: "url(https://via.placeholder.com/600)", // Substitua pela URL da sua imagem
+          display: { xs: "none", sm: "none", md: "block" },
+          backgroundImage: "linear-gradient(to right, #3a7bd5, #00d2ff)",
           backgroundSize: "cover",
           backgroundPosition: "center",
+          height: "100vh",
+          width: "100%",
         }}
       />
 
@@ -41,6 +79,7 @@ const LoginPage = () => {
         item
         xs={12}
         md={6}
+        sm={12}
         display="flex"
         alignItems="center"
         justifyContent="center"
@@ -52,15 +91,17 @@ const LoginPage = () => {
               Hello Multlan
             </Typography>
 
-            <Box component="form">
+            <Box onSubmit={handleSubmit(onSubmit)} component="form">
               {/* Campo de nome (aparece apenas se for cadastro) */}
               {isSignUp && (
                 <TextField
                   fullWidth
+                  {...register("name" as const)}
                   label="Nome"
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
                   variant="outlined"
                   margin="normal"
-                  required
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -76,9 +117,11 @@ const LoginPage = () => {
                 fullWidth
                 label="Email"
                 variant="outlined"
+                error={!!errors.email}
+                helperText={errors.email?.message}
                 margin="normal"
+                {...register("email")}
                 type="email"
-                required
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -92,10 +135,12 @@ const LoginPage = () => {
               <TextField
                 fullWidth
                 label="Password"
+                error={!!errors.password}
+                helperText={errors.password?.message}
                 variant="outlined"
                 margin="normal"
+                {...register("password")}
                 type="password"
-                required
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -109,6 +154,7 @@ const LoginPage = () => {
                 fullWidth
                 variant="contained"
                 color="primary"
+                type="submit"
                 sx={{ mt: 2 }}
               >
                 {isSignUp ? "Criar Conta" : "Entrar"}
@@ -133,4 +179,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default AuthPage;
