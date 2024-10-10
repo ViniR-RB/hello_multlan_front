@@ -12,8 +12,11 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import routes from "../routes";
+import { useNavigate } from "react-router-dom";
+import LogoutIcon from '@mui/icons-material/Logout';
 
 function AsideNavigation() {
+  const navigation = useNavigate()
   const drawerWidth = 240; // Largura do Drawer
   const [open, setOpen] = useState(false); // Estado para controlar a abertura do Drawer
 
@@ -33,7 +36,7 @@ function AsideNavigation() {
           width: open ? drawerWidth : 60,
           boxSizing: "border-box",
           backgroundColor: "primary.main", // Cor de fundo primária
-          color: "white", // Cor do texto
+          color: "#effaff", // Cor do texto
           transition: "width 0.3s ease", // Transição suave na largura
         },
       }}
@@ -52,12 +55,14 @@ function AsideNavigation() {
         </IconButton>
       </Box>
       <Divider />
-
-      <List>
+      
+      <List sx={{display: 'flex', flexDirection: 'column', height: '100%'}}>
         {routes.map((route) => (
           <Tooltip
+          sx={{height: 'min-content'}}
             onClick={() => {
               console.log(route.path);
+              navigation(route.path)
             }}
             title={!open ? route.name : ""}
             placement="right"
@@ -71,6 +76,22 @@ function AsideNavigation() {
             </ListItem>
           </Tooltip>
         ))}
+      
+          
+       
+         <Tooltip
+        title={!open ? "Logout" : ""}
+        placement="right"
+        sx={{marginTop: 'auto'}}
+      >
+        <ListItem>
+          <ListItemIcon sx={{ color: "white" }}>
+  
+            <LogoutIcon /> 
+          </ListItemIcon>
+          {open && <ListItemText primary="Logout" />}
+        </ListItem>
+      </Tooltip>
       </List>
     </Drawer>
   );
