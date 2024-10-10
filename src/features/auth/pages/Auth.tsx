@@ -14,8 +14,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { FieldErrors, useForm } from "react-hook-form";
 import { z } from "zod";
+import LoadingButton from "../../../core/components/LoadingButton";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Digite um email válido" }),
@@ -34,9 +35,9 @@ type LoginFormInputs = z.infer<typeof loginSchema>;
 type SignupFormInputs = z.infer<typeof signupSchema>;
 
 const AuthPage = () => {
-  const [isSignUp, setIsSignUp] = useState(false); // Estado para controlar se é cadastro ou login
+  const [isSignUp, setIsSignUp] = useState<boolean>(false);
+  const [isLoading,setIsLoading] = useState<boolean>(false)
 
-  // Função para alternar entre Login e Sign Up
   const handleSignUpToggle = () => {
     setIsSignUp(!isSignUp);
   };
@@ -50,11 +51,17 @@ const AuthPage = () => {
   });
 
   const onSubmit = (data: unknown) => {
-    if (isSignUp) {
-      console.log("Cadastro: ", data);
-    } else {
-      console.log("Login: ", data);
-    }
+    setIsLoading(true)
+    
+    setTimeout(() => {
+      if (isSignUp) {
+        console.log("Cadastro: ", data);
+      } else {
+        console.log("Login: ", data);
+      }
+      setIsLoading(false)
+    }, 2000)
+
   };
 
   return (
@@ -80,26 +87,22 @@ const AuthPage = () => {
         xs={12}
         md={6}
         sm={12}
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        sx={{ backgroundColor: "#f0f0f0" }} // Cor de fundo suave
       >
-        <Card sx={{ maxWidth: 400, p: 4 }}>
+        <Card sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' ,maxWidth: "full", height: '100%'  , p: 4 }}>
           <CardContent>
             <Typography variant="h4" gutterBottom>
               Hello Multlan
             </Typography>
 
-            <Box onSubmit={handleSubmit(onSubmit)} component="form">
+            <Box sx={{maxWidth: 500}} onSubmit={handleSubmit(onSubmit)} component="form">
               {/* Campo de nome (aparece apenas se for cadastro) */}
               {isSignUp && (
                 <TextField
                   fullWidth
                   {...register("name" as const)}
                   label="Nome"
-                  error={!!errors.name}
-                  helperText={errors.name?.message}
+                  error={  !!(errors as FieldErrors<SignupFormInputs>).name   }
+                  helperText={  (errors as FieldErrors<SignupFormInputs>).name?.message }
                   variant="outlined"
                   margin="normal"
                   InputProps={{
@@ -150,15 +153,18 @@ const AuthPage = () => {
                 }}
               />
 
-              <Button
+              <LoadingButton
                 fullWidth
+                loading={isLoading}
                 variant="contained"
                 color="primary"
                 type="submit"
                 sx={{ mt: 2 }}
               >
                 {isSignUp ? "Criar Conta" : "Entrar"}
-              </Button>
+              </LoadingButton>
+
+              
             </Box>
 
             {/* Botão para alternar entre Login e Cadastro */}
