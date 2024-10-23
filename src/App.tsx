@@ -1,11 +1,8 @@
-// App.tsx
 import React from "react";
-import {
-  createBrowserRouter,
-  Navigate,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import MainLayout from "./core/components/MainLayout";
+import { AuthProvider } from "./core/context/AuthContext";
+import PrivateRoute from "./core/utils/PrivateRouter";
 import AuthPage from "./features/auth/pages/Auth";
 import DashboardPage from "./features/dashboard/pages/Dashboard";
 import MapPage from "./features/map/pages/MapPage";
@@ -14,21 +11,21 @@ const router = createBrowserRouter(
   [
     {
       path: "/",
-
-      element: <MainLayout />, // Usando o layout comum
-
+      element: <PrivateRoute />, // Protegendo as rotas com PrivateRoute
       children: [
         {
-          path: "", // Rota para Dashboard
-          element: <Navigate to="/dashboard" replace />,
-        },
-        {
-          path: "dashboard", // Rota para Dashboard
-          element: <DashboardPage />,
-        },
-        {
-          path: "map", // Rota para o mapa
-          element: <MapPage />,
+          path: "/",
+          element: <MainLayout />, // Envolvendo o MainLayout
+          children: [
+            {
+              path: "dashboard",
+              element: <DashboardPage />,
+            },
+            {
+              path: "map",
+              element: <MapPage />, // Página do Mapa protegida
+            },
+          ],
         },
       ],
     },
@@ -41,7 +38,11 @@ const router = createBrowserRouter(
 );
 
 const App: React.FC = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 };
 
 export default App;

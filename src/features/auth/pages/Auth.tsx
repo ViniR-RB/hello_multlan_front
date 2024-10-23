@@ -15,8 +15,10 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { FieldErrors, useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import LoadingButton from "../../../core/components/LoadingButton";
+import { useAuth } from "../../../core/context/AuthContext";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Digite um email válido" }),
@@ -36,12 +38,12 @@ type SignupFormInputs = z.infer<typeof signupSchema>;
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
-  const [isLoading,setIsLoading] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSignUpToggle = () => {
     setIsSignUp(!isSignUp);
   };
-
+  const { login } = useAuth();
   const {
     register,
     handleSubmit,
@@ -49,19 +51,18 @@ const AuthPage = () => {
   } = useForm<LoginFormInputs | SignupFormInputs>({
     resolver: zodResolver(isSignUp ? signupSchema : loginSchema),
   });
+  const navigate = useNavigate();
+  const onSubmit = (data: LoginFormInputs | SignupFormInputs) => {
+    setIsLoading(true);
 
-  const onSubmit = (data: unknown) => {
-    setIsLoading(true)
-    
-    setTimeout(() => {
-      if (isSignUp) {
-        console.log("Cadastro: ", data);
-      } else {
-        console.log("Login: ", data);
-      }
-      setIsLoading(false)
-    }, 2000)
+    if (isSignUp) {
+      console.log("Cadastro: ", data);
+    } else {
+      const { email, password } = data;
 
+      login({ email, password }).finally(() => setIsLoading(false));
+      navigate("/dashboard");
+    }
   };
 
   return (
@@ -82,27 +83,37 @@ const AuthPage = () => {
       />
 
       {/* Lado direito com o card de login/cadastro */}
-      <Grid
-        item
-        xs={12}
-        md={6}
-        sm={12}
-      >
-        <Card sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' ,maxWidth: "full", height: '100%'  , p: 4 }}>
+      <Grid item xs={12} md={6} sm={12}>
+        <Card
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            maxWidth: "full",
+            height: "100%",
+            p: 4,
+          }}
+        >
           <CardContent>
             <Typography variant="h4" gutterBottom>
               Hello Multlan
             </Typography>
 
-            <Box sx={{maxWidth: 500}} onSubmit={handleSubmit(onSubmit)} component="form">
+            <Box
+              sx={{ maxWidth: 500 }}
+              onSubmit={handleSubmit(onSubmit)}
+              component="form"
+            >
               {/* Campo de nome (aparece apenas se for cadastro) */}
               {isSignUp && (
                 <TextField
                   fullWidth
                   {...register("name" as const)}
                   label="Nome"
-                  error={  !!(errors as FieldErrors<SignupFormInputs>).name   }
-                  helperText={  (errors as FieldErrors<SignupFormInputs>).name?.message }
+                  error={!!(errors as FieldErrors<SignupFormInputs>).name}
+                  helperText={
+                    (errors as FieldErrors<SignupFormInputs>).name?.message
+                  }
                   variant="outlined"
                   margin="normal"
                   InputProps={{
@@ -163,8 +174,6 @@ const AuthPage = () => {
               >
                 {isSignUp ? "Criar Conta" : "Entrar"}
               </LoadingButton>
-
-              
             </Box>
 
             {/* Botão para alternar entre Login e Cadastro */}

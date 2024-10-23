@@ -2,8 +2,9 @@
 import { Box } from "@mui/material";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import MapController from "../controller/MapController";
 // Configura o ícone do marcador
 const icon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
@@ -15,7 +16,14 @@ const icon = new L.Icon({
 
 const MapPage: React.FC = () => {
   const position: [number, number] = [-5.168096, -42.791906]; // Coordenadas do centro do mapa
-
+  const controller = MapController();
+  const [boxs, setBoxs] = useState<Array<any>>([]);
+  useEffect(() => {
+    const getBoxs = () => {
+      controller.getBox().then((data) => setBoxs(data));
+    };
+    getBoxs();
+  }, []);
   return (
     <Box
       sx={{
@@ -36,9 +44,19 @@ const MapPage: React.FC = () => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        <Marker position={position} icon={icon}>
-          <Popup>Você está aqui!</Popup>
-        </Marker>
+
+        {boxs.map((item, index) => {
+          console.log(item);
+          return (
+            <Marker
+              key={index}
+              position={[item.latitude, item.longitude]}
+              icon={icon}
+            >
+              <Popup>Você está aqui!</Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </Box>
   );

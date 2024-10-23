@@ -1,8 +1,21 @@
 // DashboardPage.tsx
 import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 import PageContainer from "../../../core/components/PageContainer";
+import MapController from "../controller/DashBoardController";
 
 const DashboardPage = () => {
+  const { summary } = MapController();
+  const [totalBoxs, setTotalBoxs] = useState<string>("");
+  const [totalCustomers, setTotalCustomers] = useState<string>("");
+
+  useEffect(() => {
+    summary().then((data) => {
+      setTotalBoxs(data.totalBoxes);
+      setTotalCustomers(data.totalCustomers);
+    });
+  }, []);
+
   return (
     <Box sx={{ display: "flex" }}>
       <PageContainer>
@@ -20,7 +33,7 @@ const DashboardPage = () => {
                   Quantidade de Caixas
                 </Typography>
                 <Typography variant="h4" color="primary">
-                  120 {/* Substitua pelo valor dinâmico */}
+                  {totalBoxs}
                 </Typography>
               </CardContent>
             </Card>
@@ -34,7 +47,7 @@ const DashboardPage = () => {
                   Clientes Catalogados
                 </Typography>
                 <Typography variant="h4" color="primary">
-                  45 {/* Substitua pelo valor dinâmico */}
+                  {totalCustomers}
                 </Typography>
               </CardContent>
             </Card>

@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import routes from "../routes";
 
 interface CustomDrawerProps {
@@ -21,7 +22,7 @@ interface CustomDrawerProps {
 function CustomDrawer({ open, drawerWidth }: CustomDrawerProps) {
   const navigation = useNavigate();
   const collapsedWidth = 60;
-
+  const { logout } = useAuth();
   return (
     <Drawer
       variant="permanent"
@@ -56,7 +57,7 @@ function CustomDrawer({ open, drawerWidth }: CustomDrawerProps) {
         ))}
 
         <Tooltip title={!open ? "Logout" : ""} placement="right">
-          <ListItem onClick={() => console.log("Logout")}>
+          <ListItem onClick={() => logout()}>
             <ListItemIcon>
               <LogoutIcon />
             </ListItemIcon>
