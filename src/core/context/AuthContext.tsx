@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import { httpClient } from "../http/client";
+import { useNavigate } from "react-router-dom";
 
 interface User {
   id: string;
@@ -35,7 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
-
+  const navigate = useNavigate();
   const login = async (credentials: LoginCredentials) => {
     try {
       const response = await httpClient.unAuth.post(
@@ -69,11 +70,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const storedUser = localStorage.getItem("user");
     const storedAccessToken = localStorage.getItem("accessToken");
     const storedRefreshToken = localStorage.getItem("refreshToken");
+    
 
     if (storedUser && storedAccessToken && storedRefreshToken) {
       setUser(JSON.parse(storedUser));
       setAccessToken(storedAccessToken);
       setRefreshToken(storedRefreshToken);
+      navigate('/dashboard')
     }
   }, []);
 
