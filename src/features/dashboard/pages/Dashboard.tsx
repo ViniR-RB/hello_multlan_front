@@ -14,6 +14,14 @@ const DashboardPage = () => {
       setTotalBoxs(data.totalBoxes);
       setTotalCustomers(data.totalCustomers);
     });
+
+    (async () => {
+    const data =  await summary()
+    setTotalBoxs(data.totalBoxes);
+      setTotalCustomers(data.totalCustomers);
+      
+  })();
+
   }, []);
 
   return (

@@ -60,8 +60,26 @@ const AuthPage = () => {
     } else {
       const { email, password } = data;
 
-      login({ email, password }).finally(() => setIsLoading(false));
-      navigate("/dashboard");
+      try {
+       
+
+
+        (async () => {
+          await login({email,password})
+          navigate("/dashboard");
+      })();
+
+
+
+      } catch (error) {
+        console.error(error)
+      } finally  {
+        setIsLoading(false)
+      }
+
+
+
+      
     }
   };
 
