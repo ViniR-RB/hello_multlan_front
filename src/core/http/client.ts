@@ -52,5 +52,7 @@ const createAuthClient = (): AxiosInstance => {
 // Expor os clients para uso
 export const httpClient = {
   unAuth: createUnAuthClient(),
-  auth: createAuthClient(),
+  get auth() {
+    return createAuthClient();
+  },
 };

@@ -5,8 +5,8 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { httpClient } from "../http/client";
-import { useNavigate } from "react-router-dom";
 
 interface User {
   id: string;
@@ -37,6 +37,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
   const login = async (credentials: LoginCredentials) => {
     try {
       const response = await httpClient.unAuth.post(
@@ -49,9 +51,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
 
-      const userResponse = await httpClient.unAuth.get("/api/auth/me", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const userResponse = await httpClient.auth.get("/api/auth/me");
       setUser(userResponse.data);
       localStorage.setItem("user", JSON.stringify(userResponse.data));
     } catch (error) {
@@ -64,19 +64,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setRefreshToken(null);
     setUser(null);
     localStorage.removeItem("user");
+    navigate("/login");
   };
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const storedAccessToken = localStorage.getItem("accessToken");
     const storedRefreshToken = localStorage.getItem("refreshToken");
-    
 
     if (storedUser && storedAccessToken && storedRefreshToken) {
       setUser(JSON.parse(storedUser));
       setAccessToken(storedAccessToken);
       setRefreshToken(storedRefreshToken);
-      navigate('/dashboard')
+      if (location.pathname !== "/login") navigate(location.pathname);
     }
   }, []);
 
