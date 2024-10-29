@@ -1,35 +1,20 @@
 // DashboardPage.tsx
 import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
 import PageContainer from "../../../core/components/PageContainer";
+import DashBoardSkeleton from "../components/DashBoardSkeleton";
 import MapController from "../controller/DashBoardController";
 
 const DashboardPage = () => {
-  const { summary } = MapController();
-  const [totalBoxs, setTotalBoxs] = useState<string>("");
-  const [totalCustomers, setTotalCustomers] = useState<string>("");
+  const { data, error, isLoading } = MapController();
 
-  useEffect(() => {
-    summary().then((data) => {
-      setTotalBoxs(data.totalBoxes);
-      setTotalCustomers(data.totalCustomers);
-    });
-
-    (async () => {
-    const data =  await summary()
-    setTotalBoxs(data.totalBoxes);
-      setTotalCustomers(data.totalCustomers);
-      
-  })();
-
-  }, []);
+  if (isLoading) {
+    return <DashBoardSkeleton />;
+  }
 
   return (
     <Box sx={{ display: "flex" }}>
       <PageContainer>
-        <Typography variant="h4" gutterBottom>
-          Resumo
-        </Typography>
+        <Typography variant="h4">Resumo</Typography>
 
         {/* Grid de Cards */}
         <Grid container spacing={3}>
@@ -41,7 +26,7 @@ const DashboardPage = () => {
                   Quantidade de Caixas
                 </Typography>
                 <Typography variant="h4" color="primary">
-                  {totalBoxs}
+                  {data.totalBoxes}
                 </Typography>
               </CardContent>
             </Card>
@@ -55,7 +40,7 @@ const DashboardPage = () => {
                   Clientes Catalogados
                 </Typography>
                 <Typography variant="h4" color="primary">
-                  {totalCustomers}
+                  {data.totalCustomers}
                 </Typography>
               </CardContent>
             </Card>
