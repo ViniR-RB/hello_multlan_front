@@ -1,12 +1,20 @@
+import { useQuery } from "@tanstack/react-query";
 import { httpClient } from "../../../core/http/client";
+import BoxModel from "../../../core/models/box_model";
+import AppQuery from "../../../core/querys/appQuery";
 
 export default function MapController() {
   const getBox = async () => {
-    const result = await httpClient.auth.get("/api/box");
-    console.log(result.data);
-
-    return result.data;
+    const { data } = await httpClient.auth.get("/api/box");
+    return data;
   };
 
-  return { getBox };
+  const { data, error, isLoading } = useQuery<BoxModel[]>({
+    queryKey: [AppQuery.getBoxs],
+    queryFn: getBox,
+    staleTime: 0,
+    refetchOnMount: false,
+  });
+
+  return { data, error, isLoading };
 }
