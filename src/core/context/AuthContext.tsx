@@ -81,17 +81,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    if (!refreshToken) {
+      logout();
+      return () => {};
+    }
     const refreshAccessToken = async () => {
-      if (refreshToken) {
-        try {
-          const response = await httpClient.auth.post("/api/auth/refresh", {
-            refreshToken: refreshToken,
-          });
-          setAccessToken(response.data.accessToken);
-        } catch (error) {
-          console.error("Erro ao renovar o token", error);
-          logout();
-        }
+      try {
+        const response = await httpClient.auth.post("/api/auth/refresh", {
+          refreshToken: refreshToken,
+        });
+        console.log("RESPONSE", response);
+        setAccessToken(response.data.accessToken);
+        setRefreshToken(response.data.refreshToken);
+      } catch (error) {
+        console.error("Erro ao renovar o token", error);
+        logout();
       }
     };
 

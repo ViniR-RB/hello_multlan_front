@@ -3,7 +3,6 @@ import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
 import PageContainer from "../../../core/components/PageContainer";
 import DashBoardSkeleton from "../components/DashBoardSkeleton";
 import MapController from "../controller/DashBoardController";
-
 const DashboardPage = () => {
   const { data, error, isLoading } = MapController();
 
