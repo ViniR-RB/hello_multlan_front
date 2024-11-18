@@ -1,24 +1,25 @@
 import { createBrowserRouter } from "react-router-dom";
-import DashboardPage from "../features/dashboard/pages/Dashboard";
-import MainLayout from "./components/MainLayout";
-import PrivateRoute from "./utils/PrivateRouter";
-import MapPage from "../features/map/pages/MapPage";
-import Layout from "./utils/Layout";
 import AuthPage from "../features/auth/pages/Auth";
+import DashboardPage from "../features/dashboard/pages/Dashboard";
+import MapPage from "../features/map/pages/MapPage";
+import UserDetailPage from "../features/users/pages/UserDetailPage";
+import UsersPage from "../features/users/pages/UsersPage";
+import CoreLayout from "./layouts/CoreLayout";
+import MainLayout from "./layouts/MainLayout";
+import PrivateRoute from "./layouts/PrivateRouter";
 
 const authRouters = {
   path: "login", // Rota para Login (fora do MainLayout)
   element: <AuthPage />,
-}
+};
 
-
-const privateRouters =  {
+const privateRouters = {
   path: "/",
-  element: <PrivateRoute />, // Protegendo as rotas com PrivateRoute
+  element: <PrivateRoute />,
   children: [
     {
       path: "/",
-      element: <MainLayout />, // Envolvendo o MainLayout
+      element: <MainLayout />,
       children: [
         {
           path: "dashboard",
@@ -26,32 +27,29 @@ const privateRouters =  {
         },
         {
           path: "map",
-          element: <MapPage />, // Página do Mapa protegida
+          element: <MapPage />,
+        },
+        {
+          path: "users",
+          element: <UsersPage />,
+          children: [
+            {
+              path: ":uuid",
+              element: <UserDetailPage />,
+            },
+          ],
         },
       ],
     },
   ],
-}
+};
 
+const router = createBrowserRouter([
+  {
+    path: "",
+    element: <CoreLayout />,
+    children: [privateRouters, authRouters],
+  },
+]);
 
-
-
- const router = createBrowserRouter(
-    [
-      {
-        path: '',
-        element: <Layout />,
-        children: [
-         privateRouters,
-         authRouters
-          
-        ]
-      },
-      
-    ],
-  );
-
-
-
-
-  export default router
+export default router;

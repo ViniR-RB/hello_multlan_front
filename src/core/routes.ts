@@ -1,4 +1,5 @@
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import GroupIcon from "@mui/icons-material/Group";
 import MapIcon from "@mui/icons-material/Map";
 interface Route {
   name: string;
@@ -16,6 +17,11 @@ const routes: Route[] = [
     name: "Mapa",
     icon: MapIcon,
     path: "/map",
+  },
+  {
+    name: "Usuários",
+    icon: GroupIcon,
+    path: "/users",
   },
 ];
 
