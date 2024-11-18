@@ -1,8 +1,13 @@
 // DashboardPage.tsx
-import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Grid from "@mui/material/Grid2";
+import Typography from "@mui/material/Typography";
 import PageContainer from "../../../core/components/PageContainer";
 import DashBoardSkeleton from "../components/DashBoardSkeleton";
 import MapController from "../controller/DashBoardController";
+
 const DashboardPage = () => {
   const { data, error, isLoading } = MapController();
 
@@ -12,13 +17,11 @@ const DashboardPage = () => {
 
   return (
     <Box sx={{ display: "flex" }}>
-      <PageContainer>
-        <Typography variant="h4">Resumo</Typography>
-
+      <PageContainer title="Resumo das Caixas">
         {/* Grid de Cards */}
         <Grid container spacing={3}>
           {/* Card: Quantidade de Caixas */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Card>
               <CardContent>
                 <Typography variant="h5" component="div">
@@ -32,7 +35,7 @@ const DashboardPage = () => {
           </Grid>
 
           {/* Card: Clientes Catalogados */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Card>
               <CardContent>
                 <Typography variant="h5" component="div">
