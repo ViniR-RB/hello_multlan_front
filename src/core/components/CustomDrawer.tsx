@@ -42,7 +42,11 @@ function CustomDrawer({ open, drawerWidth }: CustomDrawerProps) {
     >
       <Toolbar />
       <Divider />
-      <List>
+      <List
+        sx={{
+          mt: 3,
+        }}
+      >
         {routes.map((route) => (
           <Tooltip
             key={route.name}
@@ -55,11 +59,11 @@ function CustomDrawer({ open, drawerWidth }: CustomDrawerProps) {
             </ListItem>
           </Tooltip>
         ))}
-
-        <Tooltip title={!open ? "Logout" : ""} placement="right">
+        <Divider />
+        <Tooltip title={!open ? "Sair" : ""} placement="right">
           <ListItem onClick={() => logout()}>
             <ListItemIcon>
-              <LogoutIcon />
+              <LogoutIcon color="error" />
             </ListItemIcon>
             {open && <ListItemText primary="Logout" />}
           </ListItem>

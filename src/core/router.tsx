@@ -26,10 +26,6 @@ const privateRouters = {
           element: <DashboardPage />,
         },
         {
-          path: "map",
-          element: <MapPage />,
-        },
-        {
           path: "users",
           element: <UsersPage />,
         },
@@ -38,6 +34,10 @@ const privateRouters = {
           element: <UserDetailPage />,
         },
       ],
+    },
+    {
+      path: "/map",
+      element: <MapPage />,
     },
   ],
 };

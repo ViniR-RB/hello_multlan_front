@@ -11,9 +11,10 @@ const MainLayout: React.FC = () => {
   };
   return (
     <Box sx={{ display: "flex" }}>
+      {/* AppBar */}
       <AppBar
         position="fixed"
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, height: "auto" }}
       >
         <Toolbar>
           <IconButton
@@ -26,12 +27,27 @@ const MainLayout: React.FC = () => {
             <MenuIcon />
           </IconButton>
           <Box component="span" sx={{ flexGrow: 1 }}>
-            Hello Multlan
+            <img
+              src="/logo.svg"
+              alt="Logo Multlan"
+              style={{ width: "100px", height: "auto" }}
+            />
           </Box>
         </Toolbar>
       </AppBar>
+
+      {/* Drawer */}
       <CustomDrawer open={open} drawerWidth={drawerWidth} />
-      <Box component="main" sx={{ flexGrow: 1, pt: 10 }}>
+
+      {/* Conteúdo Principal */}
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          mt: { xs: "64px", sm: "64px" }, // Margem igual à altura da AppBar padrão do MUI
+          p: 2, // Espaçamento interno
+        }}
+      >
         <Outlet />
       </Box>
     </Box>
