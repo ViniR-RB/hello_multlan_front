@@ -16,10 +16,10 @@ const DashboardPage = () => {
   }
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <PageContainer title="Resumo das Caixas">
+    <PageContainer title="Resumo das Caixas">
+      <Box sx={{ display: "flex" }}>
         {/* Grid de Cards */}
-        <Grid container spacing={3}>
+        <Grid width={"100%"} container spacing={3}>
           {/* Card: Quantidade de Caixas */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Card>
@@ -48,8 +48,8 @@ const DashboardPage = () => {
             </Card>
           </Grid>
         </Grid>
-      </PageContainer>
-    </Box>
+      </Box>
+    </PageContainer>
   );
 };
 
