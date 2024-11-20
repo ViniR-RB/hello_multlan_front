@@ -1,3 +1,4 @@
+"use server";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { IconButton, Tooltip } from "@mui/material";
@@ -62,7 +63,11 @@ const UserCard: React.FC<UserCardProps> = ({
         </Grid>
       </Grid>
       <Tooltip sx={{ mr: "auto" }} title="Perfil do usuário">
-        <IconButton color="default" component={Link} to={`/users/${id}`}>
+        <IconButton
+          color="default"
+          component={Link}
+          to={`/users/${id}/${name}/${email}`}
+        >
           <SettingsIcon />
         </IconButton>
       </Tooltip>

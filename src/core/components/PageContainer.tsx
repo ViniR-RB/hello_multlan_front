@@ -10,7 +10,6 @@ const PageContainer: React.FC<PageContainerProps> = ({ children, title }) => {
   return (
     <Box
       sx={{
-        width: "100%",
         mx: "auto",
         p: 3,
       }}

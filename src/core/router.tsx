@@ -32,12 +32,10 @@ const privateRouters = {
         {
           path: "users",
           element: <UsersPage />,
-          children: [
-            {
-              path: ":uuid",
-              element: <UserDetailPage />,
-            },
-          ],
+        },
+        {
+          path: "/users/:uuid/:name/:email",
+          element: <UserDetailPage />,
         },
       ],
     },
