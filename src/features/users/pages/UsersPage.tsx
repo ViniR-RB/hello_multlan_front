@@ -130,8 +130,8 @@ function UsersPage() {
         </Button>
       </Box>
 
-      {users!.map((user) => {
-        return <UserCard user={user} />;
+      {users!.map((user, index) => {
+        return <UserCard key={index} user={user} />;
       })}
     </PageContainer>
   );

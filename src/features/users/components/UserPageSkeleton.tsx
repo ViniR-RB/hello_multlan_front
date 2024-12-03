@@ -9,9 +9,10 @@ function UserPageSkeleton() {
       <Box mt={1} mb={1}>
         <Skeleton variant="rectangular" width={133} height={37} />
       </Box>
-      {arrayFake.map(() => (
-        <>
+      <>
+        {arrayFake.map((index) => (
           <Box
+            key={index}
             sx={{
               display: "flex",
               flexDirection: "column",
@@ -47,8 +48,8 @@ function UserPageSkeleton() {
             />
             <Divider flexItem={true} orientation="horizontal" />
           </Box>
-        </>
-      ))}
+        ))}
+      </>
     </PageContainer>
   );
 }
