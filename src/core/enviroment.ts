@@ -3,6 +3,8 @@ import { z } from "zod";
 const envSchema = z.object({
   VITE_API_URL: z.string().url(),
   VITE_ENVIRONMENT: z.enum(["development", "production", "staging"]),
+  VITE_GEOSEARCH_API_URL: z.string().url(),
+  VITE_GEOSEARCH_API_KEY: z.string(),
 });
 
 class EnvConfig {
@@ -10,6 +12,8 @@ class EnvConfig {
 
   VITE_API_URL: string;
   VITE_ENVIRONMENT: "development" | "production" | "staging";
+  VITE_GEOSEARCH_API_URL: string;
+  VITE_GEOSEARCH_API_KEY: string;
 
   private constructor() {
     const parsedEnv = envSchema.safeParse(import.meta.env);
@@ -24,6 +28,8 @@ class EnvConfig {
 
     this.VITE_API_URL = parsedEnv.data.VITE_API_URL;
     this.VITE_ENVIRONMENT = parsedEnv.data.VITE_ENVIRONMENT;
+    this.VITE_GEOSEARCH_API_URL = parsedEnv.data.VITE_GEOSEARCH_API_URL;
+    this.VITE_GEOSEARCH_API_KEY = parsedEnv.data.VITE_GEOSEARCH_API_KEY;
   }
 
   public static getInstance(): EnvConfig {

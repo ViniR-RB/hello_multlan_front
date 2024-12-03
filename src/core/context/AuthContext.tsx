@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import useCookiesAuth from "../hooks/jwt_hook";
 import { httpClient } from "../http/client";
 
 interface User {
@@ -16,7 +17,6 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  accessToken: string | null;
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
 }
@@ -34,10 +34,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
+
   const navigate = useNavigate();
   const location = useLocation();
+  const {
+    insertAccessToken,
+    insertRefreshToken,
+    removeTokens,
+    getAcessTokenToken,
+    getUser,
+    getRefreshToken,
+    insertUser,
+  } = useCookiesAuth();
 
   const login = async (credentials: LoginCredentials) => {
     try {
@@ -46,65 +54,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         credentials
       );
       const { accessToken, refreshToken } = response.data;
-      setAccessToken(accessToken);
-      setRefreshToken(refreshToken);
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
+
+      insertAccessToken(accessToken);
+      insertRefreshToken(refreshToken);
 
       const userResponse = await httpClient.auth.get("/api/auth/me");
       setUser(userResponse.data);
-      localStorage.setItem("user", JSON.stringify(userResponse.data));
+      insertUser(userResponse.data);
     } catch (error) {
       console.error("Erro ao fazer login", error);
     }
   };
 
   const logout = () => {
-    setAccessToken(null);
-    setRefreshToken(null);
-    setUser(null);
-    localStorage.removeItem("user");
+    removeTokens();
     navigate("/login");
   };
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedAccessToken = localStorage.getItem("accessToken");
-    const storedRefreshToken = localStorage.getItem("refreshToken");
+    const storedUser = getUser();
+    const storedAccessToken = getAcessTokenToken();
+    const storedRefreshToken = getRefreshToken();
 
     if (storedUser && storedAccessToken && storedRefreshToken) {
-      setUser(JSON.parse(storedUser));
-      setAccessToken(storedAccessToken);
-      setRefreshToken(storedRefreshToken);
-      if (location.pathname !== "/login") navigate(location.pathname);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!refreshToken) {
-      logout();
-      return () => {};
-    }
-    const refreshAccessToken = async () => {
-      try {
-        const response = await httpClient.auth.post("/api/auth/refresh", {
-          refreshToken: refreshToken,
-        });
-        console.log("RESPONSE", response);
-        setAccessToken(response.data.accessToken);
-        setRefreshToken(response.data.refreshToken);
-      } catch (error) {
-        console.error("Erro ao renovar o token", error);
-        logout();
+      if (location.pathname === "/login") {
+        console.log("redirecting to dashboard");
+        navigate("/dashboard", { replace: true });
+      } else {
+        console.log("redirecting to previous page");
+        navigate(location.pathname, { replace: true });
       }
-    };
-
-    const intervalId = setInterval(refreshAccessToken, 24 * 60 * 60 * 1000); // 24 horas
-    return () => clearInterval(intervalId);
-  }, [refreshToken]);
+    } else {
+      logout();
+    }
+  }, [location.pathname, navigate]);
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
