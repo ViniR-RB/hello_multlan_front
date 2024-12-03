@@ -2,9 +2,9 @@ import { Alert, AlertColor, Snackbar } from "@mui/material";
 import React, { createContext, useContext, useState } from "react";
 
 type SnackbarContextType = {
-  showSuccess: (message: string) => void;
-  showError: (message: string) => void;
-  showInfo: (message: string) => void;
+  showSuccess: (message: string, closeEvent?: () => void) => void;
+  showError: (message: string, closeEvent?: () => void) => void;
+  showInfo: (message: string, closeEvent?: () => void) => void;
 };
 
 const SnackbarContext = createContext<SnackbarContextType | undefined>(
@@ -15,6 +15,7 @@ type SnackbarState = {
   message: string;
   severity: AlertColor;
   open: boolean;
+  closeEvent: (() => void) | null;
 };
 
 export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -24,20 +25,33 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({
     message: "",
     severity: "success",
     open: false,
+    closeEvent: null,
   });
 
-  const showSnackbar = (message: string, severity: AlertColor) => {
-    setSnackbar({ message, severity, open: true });
+  const showSnackbar = (
+    message: string,
+    severity: AlertColor,
+    closeEvent: (() => void) | null
+  ) => {
+    setSnackbar({ message, severity, open: true, closeEvent });
   };
 
   const handleClose = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
+    setSnackbar((prev) => {
+      if (prev.closeEvent) {
+        prev.closeEvent(); // Executa a função adicional (se houver)
+      }
+      return { ...prev, open: false, closeEvent: null }; // Reseta o estado
+    });
   };
 
   const contextValue: SnackbarContextType = {
-    showSuccess: (message) => showSnackbar(message, "success"),
-    showError: (message) => showSnackbar(message, "error"),
-    showInfo: (message) => showSnackbar(message, "info"),
+    showSuccess: (message, closeEvent) =>
+      showSnackbar(message, "success", closeEvent ?? null), // Define `null` caso `closeEvent` seja `undefined`
+    showError: (message, closeEvent) =>
+      showSnackbar(message, "error", closeEvent ?? null),
+    showInfo: (message, closeEvent) =>
+      showSnackbar(message, "info", closeEvent ?? null),
   };
 
   return (
@@ -45,7 +59,6 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({
       {children}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={3000}
         onClose={handleClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       >

@@ -5,6 +5,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import EnvConfig from "../enviroment";
+import useCookiesAuth from "../hooks/jwt_hook";
 
 const handleRequestError = (error: AxiosError) => {
   console.error("Erro na requisição:", error);
@@ -28,14 +29,56 @@ const createAuthClient = (): AxiosInstance => {
   const authClient = axios.create({
     baseURL: EnvConfig.getInstance().VITE_API_URL,
   });
-  const accessToken = localStorage.getItem("accessToken");
 
   authClient.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
+    async (config: InternalAxiosRequestConfig) => {
+      const {
+        getAcessTokenToken,
+        isAccessTokenExpired,
+        getRefreshToken,
+        insertAccessToken,
+        insertRefreshToken,
+      } = useCookiesAuth();
+      let { value: accessToken } = getAcessTokenToken();
+
+      // Verificar se o accessToken expirou
+      if (isAccessTokenExpired()) {
+        config.headers = config.headers || {};
+        config.headers.Authorization = `Bearer ${accessToken}`;
+
+        try {
+          const { value: refreshToken } = getRefreshToken();
+
+          if (!refreshToken) {
+            throw new Error("Refresh token não encontrado.");
+          }
+
+          // Chamar a API para renovar o token
+          const response = await axios.post(
+            `${EnvConfig.getInstance().VITE_API_URL}/api/auth/refresh`,
+            { refreshToken }
+          );
+
+          const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+            response.data;
+
+          // Atualizar os cookies
+          insertAccessToken(newAccessToken);
+          insertRefreshToken(newRefreshToken);
+
+          // Atualizar o token na requisição atual
+          accessToken = newAccessToken;
+        } catch (error) {
+          console.error("Erro ao renovar o token:", error);
+          throw error;
+        }
+      }
+
       if (accessToken) {
         config.headers = config.headers || {};
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
+
       return config;
     },
     (error: AxiosError) => Promise.reject(error)
