@@ -8,13 +8,14 @@ import EnvConfig from "../enviroment";
 import useCookiesAuth from "../hooks/jwt_hook";
 
 const handleRequestError = (error: AxiosError) => {
-  console.error("Erro na requisição:", error);
   return Promise.reject(error);
 };
 
 const createUnAuthClient = (): AxiosInstance => {
   const unAuthClient = axios.create({
     baseURL: EnvConfig.getInstance().VITE_API_URL,
+    timeout: 5000,
+    timeoutErrorMessage: "Tempo de requisição excedido.",
   });
 
   unAuthClient.interceptors.response.use(
@@ -28,6 +29,8 @@ const createUnAuthClient = (): AxiosInstance => {
 const createAuthClient = (): AxiosInstance => {
   const authClient = axios.create({
     baseURL: EnvConfig.getInstance().VITE_API_URL,
+    timeout: 5000,
+    timeoutErrorMessage: "Tempo de requisição excedido.",
   });
 
   authClient.interceptors.request.use(

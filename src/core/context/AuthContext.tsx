@@ -17,7 +17,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (credentials: LoginCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<boolean | Error>;
   logout: () => void;
 }
 
@@ -61,8 +61,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userResponse = await httpClient.auth.get("/api/auth/me");
       setUser(userResponse.data);
       insertUser(userResponse.data);
+      return true;
     } catch (error) {
       console.error("Erro ao fazer login", error);
+      return error;
     }
   };
 
