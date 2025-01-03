@@ -7,11 +7,11 @@ const queryClient = new QueryClient();
 export default function CoreLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SnackbarProvider>
+      <SnackbarProvider>
+        <AuthProvider>
           <Outlet />
-        </SnackbarProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </SnackbarProvider>
     </QueryClientProvider>
   );
 }

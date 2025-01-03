@@ -22,5 +22,10 @@ export default function UsersController() {
     await httpClient.unAuth.post("/api/auth/register", data);
   };
 
-  return { users: data, isLoading, error, createUser };
+  const updatePassword = async (data: Pick<UserModel, "id" | "password">) => {
+    const { id, password } = data;
+    await httpClient.auth.post(`/api/auth/change-password/${id}`, { password });
+  };
+
+  return { users: data, isLoading, error, createUser, updatePassword };
 }

@@ -1,12 +1,9 @@
 import axios from "axios";
 import EnvConfig from "../enviroment";
 import Location from "../models/location";
+import { GeoSerach } from "./geosearch";
 
-export interface GeoSerach {
-  serachByAddres(address: string): Promise<Location[]>;
-}
-
-export class GeoSearchImpl implements GeoSerach {
+export class OpenStreetImpl implements GeoSerach {
   enviroment: EnvConfig;
 
   constructor() {
@@ -14,16 +11,13 @@ export class GeoSearchImpl implements GeoSerach {
   }
   async serachByAddres(address: string) {
     try {
-      const apiKey = this.enviroment.VITE_GEOSEARCH_API_KEY;
       const apiUrl = this.enviroment.VITE_GEOSEARCH_API_URL;
-      const endpoint = apiUrl + `?q=${address}&key=${apiKey}`;
+      const endpoint = apiUrl + `?q=${address}&format=json`;
       const response = await axios.get(endpoint);
-      const data = response.data.results as Array<any>;
-
+      const data = response.data as Array<any>;
       const locations = data.map((locations) =>
-        Location.fromJsonGeoSearch(locations)
+        Location.fromJsonOpenStreet(locations)
       );
-
       return locations;
     } catch (error) {
       console.error(error);

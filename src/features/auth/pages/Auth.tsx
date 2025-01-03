@@ -2,23 +2,46 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
-import PersonIcon from "@mui/icons-material/Person";
 import {
   Box,
-  Button,
   Card,
   CardContent,
   Grid,
   InputAdornment,
+  keyframes,
+  styled,
   TextField,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { FieldErrors, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
+import LogoMultlan from "../../../../public/logo.png";
 import LoadingButton from "../../../core/components/LoadingButton";
 import { useAuth } from "../../../core/context/AuthContext";
+import { useSnackbar } from "../../../core/context/SnackBarContext";
+const typewriter = keyframes`
+  from { width: 0 }
+  to { width: 100% }
+`;
+
+const blink = keyframes`
+  from { border-color: transparent }
+  50% { border-color: black }
+  to { border-color: transparent }
+`;
+
+// Typography component estilizado
+const AnimatedTypography = styled(Typography)`
+  display: inline-block;
+  overflow: hidden;
+  border-right: 3px solid;
+  white-space: nowrap;
+  margin: 0;
+  animation: ${typewriter} 2s steps(20, end), ${blink} 0.75s step-end infinite;
+  width: fit-content;
+`;
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Digite um email válido" }),
@@ -27,50 +50,33 @@ const loginSchema = z.object({
     .min(6, { message: "A senha deve ter pelo menos 6 caracteres" }),
 });
 
-const signupSchema = loginSchema.extend({
-  name: z
-    .string()
-    .min(3, { message: "O nome deve ter pelo menos 3 caracteres" }),
-});
-
 type LoginFormInputs = z.infer<typeof loginSchema>;
-type SignupFormInputs = z.infer<typeof signupSchema>;
 
 const AuthPage = () => {
-  const [isSignUp, setIsSignUp] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleSignUpToggle = () => {
-    setIsSignUp(!isSignUp);
-  };
   const { login } = useAuth();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormInputs | SignupFormInputs>({
-    resolver: zodResolver(isSignUp ? signupSchema : loginSchema),
+  } = useForm<LoginFormInputs>({
+    resolver: zodResolver(loginSchema),
   });
   const navigate = useNavigate();
-  const onSubmit = (data: LoginFormInputs | SignupFormInputs) => {
-    setIsLoading(true);
-
-    if (isSignUp) {
-      console.log("Cadastro: ", data);
-    } else {
-      const { email, password } = data;
-
-      try {
-        (async () => {
-          await login({ email, password });
-          navigate("/dashboard");
-        })();
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
+  const { showError } = useSnackbar();
+  const onSubmit = (data: LoginFormInputs) => {
+    const { email, password } = data;
+    (async () => {
+      setIsLoading(true);
+      const result = await login({ email, password });
+      setIsLoading(false);
+      if (result === true) {
+        navigate("/dashboard");
+      } else {
+        showError("Erro ao fazer login");
       }
-    }
+    })();
   };
 
   return (
@@ -103,37 +109,24 @@ const AuthPage = () => {
           }}
         >
           <CardContent>
-            <Typography variant="h4" gutterBottom>
-              Hello Multlan
-            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <img width={150} src={LogoMultlan} alt="Logo Multlan" />
+              <AnimatedTypography variant="h4" gutterBottom>
+                Hello Multlan
+              </AnimatedTypography>
+            </Box>
 
             <Box
               sx={{ maxWidth: 500 }}
               onSubmit={handleSubmit(onSubmit)}
               component="form"
             >
-              {/* Campo de nome (aparece apenas se for cadastro) */}
-              {isSignUp && (
-                <TextField
-                  fullWidth
-                  {...register("name" as const)}
-                  label="Nome"
-                  error={!!(errors as FieldErrors<SignupFormInputs>).name}
-                  helperText={
-                    (errors as FieldErrors<SignupFormInputs>).name?.message
-                  }
-                  variant="outlined"
-                  margin="normal"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              )}
-
               {/* Campo de email com ícone */}
               <TextField
                 fullWidth
@@ -144,12 +137,14 @@ const AuthPage = () => {
                 margin="normal"
                 {...register("email")}
                 type="email"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailIcon />
-                    </InputAdornment>
-                  ),
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <EmailIcon />
+                      </InputAdornment>
+                    ),
+                  },
                 }}
               />
 
@@ -180,21 +175,9 @@ const AuthPage = () => {
                 type="submit"
                 sx={{ mt: 2 }}
               >
-                {isSignUp ? "Criar Conta" : "Entrar"}
+                Entrar
               </LoadingButton>
             </Box>
-
-            {/* Botão para alternar entre Login e Cadastro */}
-            <Typography variant="body2" align="center" sx={{ mt: 2 }}>
-              {isSignUp ? "Já tem uma conta?" : "Ainda não tem conta?"}&nbsp;
-              <Button
-                onClick={handleSignUpToggle}
-                variant="text"
-                color="primary"
-              >
-                {isSignUp ? "Fazer login" : "Criar agora"}
-              </Button>
-            </Typography>
           </CardContent>
         </Card>
       </Grid>

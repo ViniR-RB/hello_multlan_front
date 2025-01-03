@@ -7,20 +7,20 @@ import {
   Button,
   CircularProgress,
   Snackbar,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import React, { useEffect, useMemo, useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import React, { useEffect, useState } from "react";
+import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import { useNavigate } from "react-router-dom";
-import RulerIcon from "../../../../public/icons/ruler_icon.svg";
 import { useAuth } from "../../../core/context/AuthContext";
+import { useSnackbar } from "../../../core/context/SnackBarContext";
 import BoxModel from "../../../core/models/box_model";
 import Location from "../../../core/models/location";
 import routes from "../../../core/routes";
-import AuxiliaryComponentsMap from "../components/AuxiliaryComponentsMap";
 import BoxDetailButtomSheet from "../components/BoxDetailButtomSheet";
 import ButtonLink from "../components/ButtonLink";
 import { FlyToLocation } from "../components/FlyToLocation";
@@ -37,16 +37,18 @@ const icon = new L.Icon({
 });
 
 const MapPage: React.FC = () => {
+  const map = useMap();
   const position: [number, number] = [-5.168096, -42.791906];
   const navigation = useNavigate();
+  const { showSuccess, showError } = useSnackbar();
   const { logout } = useAuth();
-  const { data, error, isLoading, getGeoByAddress } = MapController();
+  const { data, isLoading, getGeoByAddress, deleteBox } = MapController();
 
   const [placeOptions, setPlaceOptions] = useState<Location[]>([]);
   const [place, setPlace] = useState<Location>();
   const [address, setAddress] = useState("");
   const [debouncedValue, setDebouncedValue] = useState("");
-  const [searchLoading, setSearchLoading] = useState<boolean>(false);
+  const [, setSearchLoading] = useState<boolean>(false);
 
   const [startLocation, setStartLocation] = useState<[number, number] | null>(
     null
@@ -55,9 +57,9 @@ const MapPage: React.FC = () => {
 
   const [selectedPoints, setSelectedPoints] = useState<number>(0);
 
-  const [openModalBoxDetail, setOpenModalBoxDetail] = useState<boolean>(false);
-
-  const [activeSearchRoute, setActiveSearchRoute] = useState<boolean>(false);
+  const [openModalBoxDetail, setOpenModalBoxDetail] = useState<
+    Record<string, boolean>
+  >({});
 
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
 
@@ -74,9 +76,7 @@ const MapPage: React.FC = () => {
   };
 
   const handleDetailBox = (boxId: string) => {
-    setOpenModalBoxDetail(true);
-
-    console.log(boxId);
+    setOpenModalBoxDetail((prev) => ({ ...prev, [boxId]: !prev[boxId] }));
   };
 
   const handleMapClick = (event: BoxModel | Location) => {
@@ -98,6 +98,16 @@ const MapPage: React.FC = () => {
     setStartLocation(null);
     setEndLocation(null);
     setSelectedPoints(0);
+  };
+
+  const handleDeleteBox = async (id: string) => {
+    try {
+      map.closePopup();
+      await deleteBox(id);
+      showSuccess("Caixa removida com sucesso");
+    } catch {
+      showError("Erro ao remover caixa, tente novamente");
+    }
   };
 
   useEffect(() => {
@@ -132,17 +142,6 @@ const MapPage: React.FC = () => {
       handleShowSnackBar(`Pontos selecionados: ${selectedPoints}`);
     }
   }, [selectedPoints, openSnackbar]);
-
-  const auxiliaryButtonsArray = useMemo(() => {
-    return [
-      {
-        icon: RulerIcon,
-        onClick: () => setActiveSearchRoute((prev) => !prev),
-
-        active: activeSearchRoute,
-      },
-    ];
-  }, [activeSearchRoute]);
 
   if (isLoading) {
     return (
@@ -234,8 +233,8 @@ const MapPage: React.FC = () => {
             getOptionLabel={(option) => option?.label || ""}
             value={place || null}
             noOptionsText="Nenhum resultado encontrado"
-            onInputChange={(event, newInputValue) => setAddress(newInputValue)}
-            onChange={(event, newValue) => setPlace(newValue || undefined)}
+            onInputChange={(_, newInputValue) => setAddress(newInputValue)}
+            onChange={(_, newValue) => setPlace(newValue || undefined)}
             renderInput={(params) => (
               <TextField {...params} label="Procurar Local" variant="filled" />
             )}
@@ -252,19 +251,11 @@ const MapPage: React.FC = () => {
               },
             }}
           />
-
-          {auxiliaryButtonsArray.map((item, index) => (
-            <AuxiliaryComponentsMap
-              key={index}
-              icon={item.icon}
-              active={item.active}
-              onClick={item.onClick}
-            />
-          ))}
         </Box>
       </AppBar>
 
       <MapContainer
+        key={"Map Container"}
         center={position}
         zoom={15}
         style={{ height: "100%", width: "100%" }}
@@ -279,44 +270,52 @@ const MapPage: React.FC = () => {
             <>
               <BoxDetailButtomSheet
                 key={item.id}
-                open={openModalBoxDetail}
+                open={openModalBoxDetail[item.id]}
                 box={item}
-                onClose={() => setOpenModalBoxDetail(false)}
+                onClose={() => handleDetailBox(item.id)}
               />
               <Marker
                 key={index}
                 position={[Number(item.latitude), Number(item.longitude)]}
                 icon={icon}
                 zIndexOffset={3000}
-                // eventHandlers={{
-                //   click: () => handleMapClick(item), // Aqui você chama a função ao clicar no marcador
-                // }}
               >
                 <Popup>
                   <Typography variant="caption">
-                    Signal: {item.signal}
+                    Sinal: {item.signal}
                   </Typography>
                   <br />
-                  <Typography variant="caption">label: {item.label}</Typography>
+                  <Typography variant="caption">
+                    Rótulo: {item.label}
+                  </Typography>
                   <br />
                   <Typography variant="caption">
                     Quantidade de Clientes: {item.listUser.length}
                   </Typography>
                   <br />
-                  <Button
-                    onClick={() => handleDetailBox(item.id)}
-                    variant="text"
-                    size="small"
-                  >
-                    Ver Detalhes
-                  </Button>
-                  <Button
-                    onClick={() => handleMapClick(item)}
-                    variant="text"
-                    size="small"
-                  >
-                    Adicionar na Rota
-                  </Button>
+                  <Stack>
+                    <Button
+                      onClick={() => handleDetailBox(item.id)}
+                      variant="text"
+                      size="small"
+                    >
+                      Ver Detalhes
+                    </Button>
+                    <Button
+                      onClick={() => handleMapClick(item)}
+                      variant="text"
+                      size="small"
+                    >
+                      Adicionar na Rota
+                    </Button>
+                    <Button
+                      onClick={() => handleDeleteBox(item.id)}
+                      variant="text"
+                      size="small"
+                    >
+                      Remover Caixa
+                    </Button>
+                  </Stack>
                 </Popup>
               </Marker>
             </>

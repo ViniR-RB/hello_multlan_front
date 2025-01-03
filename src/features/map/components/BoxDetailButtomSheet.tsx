@@ -69,7 +69,7 @@ function BoxDetailButtomSheet({
                 style={{
                   width: "300px",
                   height: "300px",
-                  objectFit: "contain",
+                  objectFit: "cover",
                 }}
               />
             </Box>

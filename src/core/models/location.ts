@@ -9,9 +9,14 @@ export default class Location {
     this.label = label;
   }
 
-  static fromJson(json: any) {
+  static fromJsonGeoSearch(json: any) {
     const { lat, lng } = json.geometry;
     const label = json.formatted;
     return new Location(lat, lng, label);
+  }
+  static fromJsonOpenStreet(json: any) {
+    const { lat, lon, display_name } = json;
+
+    return new Location(lat, lon, display_name);
   }
 }
