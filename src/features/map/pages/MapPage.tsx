@@ -14,8 +14,9 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import React, { useEffect, useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import { useNavigate } from "react-router-dom";
+import CustomDialog from "../../../core/components/CustomDialog";
 import { useAuth } from "../../../core/context/AuthContext";
 import { useSnackbar } from "../../../core/context/SnackBarContext";
 import BoxModel from "../../../core/models/box_model";
@@ -37,7 +38,6 @@ const icon = new L.Icon({
 });
 
 const MapPage: React.FC = () => {
-  const map = useMap();
   const position: [number, number] = [-5.168096, -42.791906];
   const navigation = useNavigate();
   const { showSuccess, showError } = useSnackbar();
@@ -102,7 +102,6 @@ const MapPage: React.FC = () => {
 
   const handleDeleteBox = async (id: string) => {
     try {
-      map.closePopup();
       await deleteBox(id);
       showSuccess("Caixa removida com sucesso");
     } catch {
@@ -268,12 +267,19 @@ const MapPage: React.FC = () => {
         {data?.map((item, index) => {
           return (
             <>
-              <BoxDetailButtomSheet
+              <CustomDialog
+                title={`Caixa ${item.id}`}
                 key={item.id}
                 open={openModalBoxDetail[item.id]}
-                box={item}
-                onClose={() => handleDetailBox(item.id)}
-              />
+                handleClose={() => handleDetailBox(item.id)}
+              >
+                <BoxDetailButtomSheet
+                  key={item.id}
+                  open={openModalBoxDetail[item.id]}
+                  box={item}
+                  onClose={() => handleDetailBox(item.id)}
+                />
+              </CustomDialog>
               <Marker
                 key={index}
                 position={[Number(item.latitude), Number(item.longitude)]}
