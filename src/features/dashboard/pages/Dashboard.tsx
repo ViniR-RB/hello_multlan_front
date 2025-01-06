@@ -5,12 +5,19 @@ import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import PageContainer from "../../../core/components/PageContainer";
+import { useSnackbar } from "../../../core/context/SnackBarContext";
+import renders from "../../../core/utils/renders";
 import DashBoardSkeleton from "../components/DashBoardSkeleton";
 import MapController from "../controller/DashBoardController";
 
 const DashboardPage = () => {
-  const { data, error, isLoading } = MapController();
+  const { data, error, isLoading, revalideQuerySearchSummary } =
+    MapController();
+  const { showError } = useSnackbar();
 
+  if (error) {
+    showError("Erro ao carregar os dados", revalideQuerySearchSummary);
+  }
   if (isLoading) {
     return <DashBoardSkeleton />;
   }
@@ -28,7 +35,7 @@ const DashboardPage = () => {
                   Quantidade de Caixas
                 </Typography>
                 <Typography variant="h4" color="primary">
-                  {data.totalBoxes}
+                  {data!.totalBoxes}
                 </Typography>
               </CardContent>
             </Card>
@@ -42,11 +49,27 @@ const DashboardPage = () => {
                   Clientes Catalogados
                 </Typography>
                 <Typography variant="h4" color="primary">
-                  {data.totalCustomers}
+                  {data!.totalCustomers}
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
+          {data!.zoneInfo.map((zone, index) => {
+            return (
+              <Grid key={index} size={{ xs: 12, md: 6 }}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h5" component="div">
+                      Caixas na Zona {renders.render_data_box(zone.zone)}
+                    </Typography>
+                    <Typography variant="h4" color="primary">
+                      {zone.zone_count}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            );
+          })}
         </Grid>
       </Box>
     </PageContainer>

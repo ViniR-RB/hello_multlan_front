@@ -7,8 +7,19 @@ dayjs.extend(timezone);
 
 dayjs();
 
-const render_date_br = (date: Date | string) => {
+export const render_date_br = (date: Date | string) => {
   return dayjs(date).tz("America/Sao_Paulo").format("DD/MM/YYYY HH:mm:ss");
 };
 
-export default render_date_br;
+const render_data_box = (box_zone: string) => {
+  switch (box_zone) {
+    case "MODERATE":
+      return "Moderada";
+    case "SAFE":
+      return "Segura";
+    case "DANGER":
+      return "Perigosa";
+  }
+};
+
+export default { render_date_br, render_data_box };

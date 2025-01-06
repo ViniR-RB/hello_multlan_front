@@ -9,7 +9,7 @@ import Typography from "@mui/material/Typography";
 import React from "react";
 import { Link } from "react-router-dom";
 import UserModel from "../../../core/models/user_model";
-import render_date_br from "../../../core/utils/renders";
+import { render_date_br } from "../../../core/utils/renders";
 
 interface UserCardProps {
   user: UserModel;
