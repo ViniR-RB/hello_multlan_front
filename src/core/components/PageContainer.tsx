@@ -19,6 +19,7 @@ const PageContainer: React.FC<PageContainerProps> = ({ children, title }) => {
     <Box
       sx={{
         mx: "auto",
+        maxWidth: "100%",
         p: 3,
       }}
     >
