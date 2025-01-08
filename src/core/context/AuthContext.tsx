@@ -17,7 +17,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (credentials: LoginCredentials) => Promise<boolean | Error>;
+  login: (credentials: LoginCredentials) => Promise<boolean | unknown>;
   logout: () => void;
 }
 
@@ -47,7 +47,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     insertUser,
   } = useCookiesAuth();
 
-  const login = async (credentials: LoginCredentials) => {
+  const login = async (
+    credentials: LoginCredentials
+  ): Promise<boolean | unknown> => {
     try {
       const response = await httpClient.unAuth.post(
         "/api/auth/login",

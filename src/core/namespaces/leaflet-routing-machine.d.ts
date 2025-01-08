@@ -1,23 +1,27 @@
+// leaflet-routing-machine.d.ts
+import * as L from "leaflet";
+
 declare module "leaflet-routing-machine" {
-  import * as L from "leaflet";
+  export namespace Routing {
+    function control(options: RoutingControlOptions): RoutingControl;
 
-  namespace Routing {
-    function control(options: any): L.RoutingControl;
-  }
+    interface RoutingControlOptions {
+      waypoints: L.LatLng[];
+      routeWhileDragging?: boolean;
+    }
 
-  namespace L {
-    namespace Routing {
-      function control(options: any): L.RoutingControl;
-
-      interface RoutingControl extends L.Control {
-        getPlan(): any;
-        getWaypoints(): any[];
-        setWaypoints(waypoints: L.LatLng[]): this;
-        onAdd(map: L.Map): HTMLElement;
-        onRemove(map: L.Map): void;
-      }
+    interface RoutingControl extends L.Control {
+      getPlan(): unknown;
+      getWaypoints(): L.LatLng[];
+      setWaypoints(waypoints: L.LatLng[]): this;
     }
   }
+}
 
-  export = L.Routing;
+declare module "leaflet" {
+  namespace Routing {
+    function control(
+      options: Routing.RoutingControlOptions
+    ): Routing.RoutingControl;
+  }
 }
